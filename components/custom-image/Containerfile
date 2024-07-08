@@ -11,7 +11,6 @@ USER 0
 #     pip install dlib==19.* --no-cache-dir
 
 # Setup epel repository
-RUN dnf install -y epel-release
 RUN dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm \
 https://mirrors.rpmfusion.org/free/el/rpmfusion-free-release-9.noarch.rpm \
 http://mirror.stream.centos.org/9-stream/CRB/x86_64/os/Packages/ladspa-1.13-28.el9.x86_64.rpm \
