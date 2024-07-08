@@ -10,4 +10,6 @@ USER 0
 RUN dnf upgrade -y --refresh && \
     pip install dlib==19.* --no-cache-dir
 
+RUN dnf install -y ffmpeg
+
 USER 1001
