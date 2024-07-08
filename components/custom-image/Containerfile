@@ -10,16 +10,11 @@ USER 0
 # RUN dnf upgrade -y --refresh && \
 #     pip install dlib==19.* --no-cache-dir
 
-# Setup epel repository
-RUN dnf install -y codeready-builder-for-rhel-9-x86_64-rpms \
-https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm \
-https://mirrors.rpmfusion.org/free/el/rpmfusion-free-release-9.noarch.rpm \
-https://mirrors.rpmfusion.org/nonfree/el/rpmfusion-nonfree-release-9.noarch.rpm 
 
-RUN dnf config-manager --set-enabled codeready-builder-for-rhel-9-x86_64-rpms
-
-# Install ffmpeg
-RUN dnf install ffmpeg
+RUN dnf config-manager --set-enabled codeready-builder-for-rhel-$(rpm -E %rhel)-x86_64-rpms
+RUN dnf -y install --nogpgcheck https://dl.fedoraproject.org/pub/epel/epel-release-latest-$(rpm -E %rhel).noarch.rpm
+RUN dnf -y install --nogpgcheck https://mirrors.rpmfusion.org/free/el/rpmfusion-free-release-$(rpm -E %rhel).noarch.rpm https://mirrors.rpmfusion.org/nonfree/el/rpmfusion-nonfree-release-$(rpm -E %rhel).noarch.rpm
+RUN dnf -y install ffmpeg
 
 # RUN pip install ffmpeg-python
 
