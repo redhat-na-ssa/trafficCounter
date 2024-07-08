@@ -8,7 +8,7 @@ metadata:
       Jupyter notebook image built on top of a set of data science libraries
       that advanced AI/ML notebooks will use as a base image, with the addition
       of the custom libraries.
-    opendatahub.io/notebook-image-name: Computer Vision
+    opendatahub.io/notebook-image-name: Computer VisionX
     opendatahub.io/notebook-image-url: https://github.com/redhat-na-ssa/trafficCounter.git
     argocd.argoproj.io/sync-wave: "3"
   labels:
@@ -17,7 +17,7 @@ metadata:
     app.kubernetes.io/created-by: byon
     opendatahub.io/dashboard: "true"
     opendatahub.io/notebook-image: "true"
-  name: computer-vision
+  name: computer-vision-x
 spec:
   lookupPolicy:
     local: true
@@ -34,7 +34,7 @@ spec:
 kind: BuildConfig
 apiVersion: build.openshift.io/v1
 metadata:
-  name: computer-vision
+  name: computer-vision-x
   annotations:
     argocd.argoproj.io/sync-wave: "2"
 spec:
