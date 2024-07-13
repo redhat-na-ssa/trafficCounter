@@ -55,9 +55,9 @@ spec:
     dockerStrategy:
       from:
         kind: ImageStreamTag
-        name: computer-vision-x
+        name: computer-vision-x:latest
       dockerfilePath: Containerfile
   output:
     to:
       kind: ImageStreamTag
-      name: computer-vision-x:1.0.0
+      name: computer-vision-x:1.0.0:latest
