@@ -48,7 +48,7 @@ spec:
           name: s2i-generic-data-science-notebook:2024.1
   source:
     git:
-      uri: https://github.com/redhat-na-ssa/flyingthings.git
+      uri: https://github.com/redhat-na-ssa/trafficCounter.git
     contextDir: components/custom-image
     ref: main
   strategy:
