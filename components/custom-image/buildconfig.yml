@@ -45,7 +45,7 @@ spec:
       imageChange:
         from:
           kind: ImageStreamTag
-          name: s2i-generic-data-science-notebook:2024.1
+          name: jupyter/base-notebook:latest
   source:
     git:
       uri: https://github.com/redhat-na-ssa/trafficCounter.git
@@ -55,7 +55,7 @@ spec:
     dockerStrategy:
       from:
         kind: ImageStreamTag
-        name: s2i-generic-data-science-notebook:2024.1
+        name: jupyter/base-notebook:latest
       dockerfilePath: Containerfile
   output:
     to:
