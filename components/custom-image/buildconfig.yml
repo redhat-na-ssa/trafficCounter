@@ -45,7 +45,7 @@ spec:
       imageChange:
         from:
           kind: ImageStreamTag
-          name: computer-vision-x
+          name: s2i-generic-data-science-notebook:2024.1
   source:
     git:
       uri: https://github.com/redhat-na-ssa/trafficCounter.git
@@ -55,9 +55,9 @@ spec:
     dockerStrategy:
       from:
         kind: ImageStreamTag
-        name: computer-vision-x:latest
+        name: s2i-generic-data-science-notebook:2024.1
       dockerfilePath: Containerfile
   output:
     to:
       kind: ImageStreamTag
-      name: computer-vision-x:1.0.0:latest
+      name: computer-vision-x:1.0.0
