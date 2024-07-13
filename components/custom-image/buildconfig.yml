@@ -45,7 +45,7 @@ spec:
       imageChange:
         from:
           kind: ImageStreamTag
-          name: jupyter/base-notebook:latest
+          name: computer-vision-x
   source:
     git:
       uri: https://github.com/redhat-na-ssa/trafficCounter.git
@@ -55,7 +55,7 @@ spec:
     dockerStrategy:
       from:
         kind: ImageStreamTag
-        name: jupyter/base-notebook:latest
+        name: computer-vision-x
       dockerfilePath: Containerfile
   output:
     to:
