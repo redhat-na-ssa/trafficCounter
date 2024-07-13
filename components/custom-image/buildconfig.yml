@@ -8,8 +8,8 @@ metadata:
       Jupyter notebook image built on top of a set of data science libraries
       that advanced AI/ML notebooks will use as a base image, with the addition
       of the custom libraries.
-    opendatahub.io/notebook-image-name: Computer VisionX
-    opendatahub.io/notebook-image-url: https://github.com/redhat-na-ssa/trafficCounter.git
+    opendatahub.io/notebook-image-name: Computer Vision
+    opendatahub.io/notebook-image-url: https://github.com/redhat-na-ssa/flyingthings.git
     argocd.argoproj.io/sync-wave: "3"
   labels:
     # note: the following label allows the notebook to show up in the dashboard
@@ -17,7 +17,7 @@ metadata:
     app.kubernetes.io/created-by: byon
     opendatahub.io/dashboard: "true"
     opendatahub.io/notebook-image: "true"
-  name: computer-vision-x
+  name: computer-vision
 spec:
   lookupPolicy:
     local: true
@@ -27,14 +27,14 @@ spec:
         opendatahub.io/default-image: 'true'
         opendatahub.io/workbench-image-recommended: 'true'
         opendatahub.io/notebook-python-dependencies: >-
-          [{"name":"ffmpeg","version":"7.0.1"}]
+          [{"name":"Dlib","version":"19.x"}]
         opendatahub.io/notebook-software: >-
           [{"name":"Python","version":"v3.9"}]
 ---
 kind: BuildConfig
 apiVersion: build.openshift.io/v1
 metadata:
-  name: computer-vision-x
+  name: computer-vision
   annotations:
     argocd.argoproj.io/sync-wave: "2"
 spec:
@@ -45,19 +45,19 @@ spec:
       imageChange:
         from:
           kind: ImageStreamTag
-          name: computer-vision-x:1.0.0
+          name: s2i-generic-data-science-notebook:2024.1
   source:
     git:
-      uri: https://github.com/redhat-na-ssa/trafficCounter.git
+      uri: https://github.com/redhat-na-ssa/flyingthings.git
     contextDir: components/custom-image
     ref: main
   strategy:
     dockerStrategy:
       from:
         kind: ImageStreamTag
-        name: computer-vision-x:1.0.0
+        name: s2i-generic-data-science-notebook:2024.1
       dockerfilePath: Containerfile
   output:
     to:
       kind: ImageStreamTag
-      name: computer-vision-x:1.0.0
+      name: computer-vision:1.0.0

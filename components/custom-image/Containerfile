@@ -1,25 +1,14 @@
-# Use the official Jupyter Notebook base image
-FROM jupyter/base-notebook:latest
+ARG BASE_IMAGE=quay.io/modh/odh-generic-data-science-notebook:v2-2023a-20230322
+# hadolint ignore=DL3006
+FROM ${BASE_IMAGE}
+
+# COPY Pipfile.lock /opt/app-root/bin/
 
 USER 0
 
-# Install FFmpeg
-RUN apt-get update && \
-    apt-get install -y ffmpeg && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
-
-# Install any additional packages you need
-RUN pip install --no-cache-dir \
-    numpy \
-    pandas \
-    matplotlib \
-    scikit-learn \
-    tensorflow \
-    torch \
-    ultralytics
-
-# Set the default command to start Jupyter Notebook
-CMD ["start-notebook.sh"]
+# hadolint ignore=DL3003
+RUN dnf upgrade -y --refresh && \
+    dnf install -y ffmpeg && \
+    pip install ultralytics --no-cache-dir
 
 USER 1001
