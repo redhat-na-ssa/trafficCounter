@@ -27,7 +27,7 @@ spec:
         opendatahub.io/default-image: 'true'
         opendatahub.io/workbench-image-recommended: 'true'
         opendatahub.io/notebook-python-dependencies: >-
-          [{"name":"Dlib","version":"19.x"}]
+          [{"name":"ffmpeg","version":"7.0.1"}]
         opendatahub.io/notebook-software: >-
           [{"name":"Python","version":"v3.9"}]
 ---
@@ -60,4 +60,4 @@ spec:
   output:
     to:
       kind: ImageStreamTag
-      name: computer-vision:1.0.0
+      name: computer-vision-x:1.0.0
