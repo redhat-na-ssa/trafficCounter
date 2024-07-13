@@ -3,6 +3,12 @@ FROM jupyter/base-notebook:latest
 
 USER 0
 
+# Install FFmpeg
+RUN apt-get update && \
+    apt-get install -y ffmpeg && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
 # Install any additional packages you need
 RUN pip install --no-cache-dir \
     numpy \
