@@ -6,9 +6,14 @@ FROM ${BASE_IMAGE}
 
 USER 0
 
-# hadolint ignore=DL3003
+# Enable EPEL and RPM Fusion repositories and install ffmpeg
 RUN dnf upgrade -y --refresh && \
+    dnf install -y epel-release && \
+    dnf install -y \
+    https://download1.rpmfusion.org/free/el/rpmfusion-free-release-9.noarch.rpm \
+    https://download1.rpmfusion.org/nonfree/el/rpmfusion-nonfree-release-9.noarch.rpm && \
     dnf install -y ffmpeg && \
-    pip install ultralytics --no-cache-dir
+    dnf clean all && \
+    rm -rf /var/cache/dnf
 
 USER 1001
