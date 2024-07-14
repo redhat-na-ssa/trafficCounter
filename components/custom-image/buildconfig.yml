@@ -27,7 +27,7 @@ spec:
         opendatahub.io/default-image: 'true'
         opendatahub.io/workbench-image-recommended: 'true'
         opendatahub.io/notebook-python-dependencies: >-
-          [{"name":"Dlib","version":"19.x"}]
+          [{"name":"ultralytics","version":"8.2.56"}]
         opendatahub.io/notebook-software: >-
           [{"name":"Python","version":"v3.9"}]
 ---
