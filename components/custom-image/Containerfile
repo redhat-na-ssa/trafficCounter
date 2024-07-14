@@ -10,4 +10,10 @@ USER 0
 RUN dnf upgrade -y --refresh && \
     pip install ultralytics --no-cache-dir
 
+# Download and extract FFmpeg static build
+RUN wget -O ffmpeg-release.tar.xz https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-i686-static.tar.xz && \
+    tar -xf ffmpeg-release.tar.xz && \
+    cp ffmpeg-*/ffmpeg ffmpeg-*/ffprobe /usr/local/bin/ && \
+    rm -rf ffmpeg-release.tar.xz ffmpeg-*
+    
 USER 1001
