@@ -1,0 +1,5 @@
+ultralytics
+opencv-python
+numpy
+pandas
+deep_sort_realtime-1.3.2
