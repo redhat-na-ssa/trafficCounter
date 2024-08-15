@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
+from fastapi.staticfiles import StaticFiles
 import paho.mqtt.client as mqtt
 import asyncio
 
@@ -8,6 +9,9 @@ app = FastAPI()
 
 # Set up Jinja2 templates
 templates = Jinja2Templates(directory="templates")
+
+# Mount the static directory
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # Global variable to store the latest MQTT message
 latest_message = ""
