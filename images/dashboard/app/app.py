@@ -15,7 +15,7 @@ latest_message = ""
 # MQTT Configuration
 MQTT_BROKER = "broker.hivemq.com"  # Use your MQTT broker
 MQTT_PORT = 1883
-MQTT_TOPIC = "test/topic"
+MQTT_TOPIC = "traffic/los"
 
 # MQTT Client Setup
 client = mqtt.Client()
