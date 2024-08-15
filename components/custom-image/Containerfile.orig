@@ -1,0 +1,23 @@
+ARG BASE_IMAGE=quay.io/modh/odh-generic-data-science-notebook:v2-2023a-20230322
+# hadolint ignore=DL3006
+FROM ${BASE_IMAGE}
+
+# COPY Pipfile.lock /opt/app-root/bin/
+
+USER 0
+
+# hadolint ignore=DL3003
+# RUN dnf upgrade -y --refresh && \
+#     pip install dlib==19.* --no-cache-dir
+
+
+RUN dnf config-manager --set-enabled codeready-builder-for-rhel-$(rpm -E %rhel)-x86_64-rpms
+RUN dnf -y install --nogpgcheck https://dl.fedoraproject.org/pub/epel/epel-release-latest-$(rpm -E %rhel).noarch.rpm
+RUN dnf -y install --nogpgcheck https://mirrors.rpmfusion.org/free/el/rpmfusion-free-release-$(rpm -E %rhel).noarch.rpm https://mirrors.rpmfusion.org/nonfree/el/rpmfusion-nonfree-release-$(rpm -E %rhel).noarch.rpm
+RUN dnf -y install ffmpeg
+
+# RUN pip install ffmpeg-python
+
+
+
+USER 1001
