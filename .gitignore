@@ -2,3 +2,4 @@ venv/
 scratch/
 yolov8*.pt
 .ipynb_checkpoints/
+__pycache__/
