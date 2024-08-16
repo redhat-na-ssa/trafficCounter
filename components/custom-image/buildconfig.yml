@@ -29,7 +29,7 @@ spec:
         opendatahub.io/notebook-python-dependencies: >-
           [{"name":"ultralytics","version":"8.2.56"}]
         opendatahub.io/notebook-software: >-
-          [{"name":"Python","version":"v3.9"}]
+          [{"name":"Python","version":"v3.9"},{"name":"ffmpeg","version":"v6.0"}]
 ---
 kind: BuildConfig
 apiVersion: build.openshift.io/v1
@@ -45,7 +45,7 @@ spec:
       imageChange:
         from:
           kind: ImageStreamTag
-          name: s2i-generic-data-science-notebook:2024.1
+          name: centos/centos:stream9:latest
   source:
     git:
       uri: https://github.com/redhat-na-ssa/trafficCounter.git
@@ -55,7 +55,7 @@ spec:
     dockerStrategy:
       from:
         kind: ImageStreamTag
-        name: s2i-generic-data-science-notebook:2024.1
+        name: centos/centos:stream9:latest
       dockerfilePath: Containerfile
   output:
     to:
