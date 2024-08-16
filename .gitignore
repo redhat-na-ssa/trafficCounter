@@ -3,3 +3,5 @@ scratch/
 yolov8*.pt
 .ipynb_checkpoints/
 __pycache__/
+*.tgz
+videos/

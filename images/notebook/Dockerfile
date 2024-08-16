@@ -1,5 +1,5 @@
 # Use CentOS Stream 9 as the base image
-FROM centos:stream9
+FROM centos/centos:stream9
 
 # Install EPEL and RPM Fusion repositories
 RUN dnf install -y epel-release && \

@@ -17,7 +17,7 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 latest_message = ""
 
 # MQTT Configuration
-MQTT_BROKER = "mqtt.cvdemo.svc.cluster.local"  # Use your MQTT broker
+MQTT_BROKER = "mqtt-broker.trafficcounter.svc.cluster.local"  # Use your MQTT broker
 MQTT_PORT = 1883
 MQTT_TOPIC = "traffic/los"
 
