@@ -15,11 +15,11 @@ metadata:
     # note: the following label allows the notebook to show up in the dashboard
     # note: byon = bring your own notebook?
     app.kubernetes.io/created-by: byon
-    opendatahub.io/notebook-image: "true"
     app.kubernetes.io/part-of: workbenches
     app.opendatahub.io/workbenches: 'true'
     component.opendatahub.io/name: notebooks
     opendatahub.io/component: 'true'
+    opendatahub.io/notebook-image: 'true'
   name: computer-vision
 spec:
   lookupPolicy:
