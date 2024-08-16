@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=quay.io/modh/odh-generic-data-science-notebook:v2-2023a-20230322
+ARG BASE_IMAGE=centos/centos:stream9
 # hadolint ignore=DL3006
 FROM ${BASE_IMAGE}
 
@@ -7,13 +7,20 @@ FROM ${BASE_IMAGE}
 USER 0
 
 # hadolint ignore=DL3003
-RUN dnf upgrade -y --refresh && \
-    pip install ultralytics --no-cache-dir
+# Install EPEL and RPM Fusion repositories
+RUN dnf install -y epel-release && \
+    dnf install -y https://mirrors.rpmfusion.org/free/el/rpmfusion-free-release-9.noarch.rpm
 
-# Download and extract FFmpeg static build
-RUN wget -O ffmpeg-release.tar.xz https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-i686-static.tar.xz && \
-    tar -xf ffmpeg-release.tar.xz && \
-    cp ffmpeg-*/ffmpeg ffmpeg-*/ffprobe /usr/local/bin/ && \
-    rm -rf ffmpeg-release.tar.xz ffmpeg-*
+# Enable CodeReady Builder repository
+RUN dnf config-manager --set-enabled crb
+
+# Install FFmpeg and development libraries
+RUN dnf install -y ffmpeg ffmpeg-devel
+
+# Verify FFmpeg installation
+RUN ffmpeg -version
+
+# Set a working directory
+WORKDIR /workspace
     
 USER 1001
