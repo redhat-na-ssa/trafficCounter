@@ -21,7 +21,6 @@ metadata:
     app.opendatahub.io/workbenches: 'true'
     component.opendatahub.io/name: notebooks
     opendatahub.io/component: 'true'
-    opendatahub.io/notebook-image: 'true'
   name: computer-vision
 spec:
   lookupPolicy:
