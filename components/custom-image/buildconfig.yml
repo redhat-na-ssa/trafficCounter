@@ -17,6 +17,11 @@ metadata:
     app.kubernetes.io/created-by: byon
     opendatahub.io/dashboard: "true"
     opendatahub.io/notebook-image: "true"
+    app.kubernetes.io/part-of: workbenches
+    app.opendatahub.io/workbenches: 'true'
+    component.opendatahub.io/name: notebooks
+    opendatahub.io/component: 'true'
+    opendatahub.io/notebook-image: 'true'
   name: computer-vision
 spec:
   lookupPolicy:
@@ -45,7 +50,7 @@ spec:
       imageChange:
         from:
           kind: ImageStreamTag
-          name: centos/centos:stream9:latest
+          name: centos:stream9:latest
   source:
     git:
       uri: https://github.com/redhat-na-ssa/trafficCounter.git
@@ -55,7 +60,7 @@ spec:
     dockerStrategy:
       from:
         kind: ImageStreamTag
-        name: centos/centos:stream9:latest
+        name: centos:stream9:latest
       dockerfilePath: Containerfile
   output:
     to:
