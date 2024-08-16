@@ -48,7 +48,7 @@ spec:
       imageChange:
         from:
           kind: ImageStreamTag
-          name: centos:stream9:latest
+          name: computer-vision:latest
   source:
     git:
       uri: https://github.com/redhat-na-ssa/trafficCounter.git
@@ -58,7 +58,7 @@ spec:
     dockerStrategy:
       from:
         kind: ImageStreamTag
-        name: centos:stream9:latest
+        name: computer-vision:latest
       dockerfilePath: Containerfile
   output:
     to:
