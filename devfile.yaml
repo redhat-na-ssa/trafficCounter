@@ -30,7 +30,7 @@ components:
           value: OpenShift console
         - name: OPENVSX_REGISTRY_URL
           value: ''
-      image: workbench-images:cuda-c9s-py311-runtime-cudnn_2023c_20230922
+      image: quay.io/opendatahub-contrib/workbench-images:cuda-runtime-datascience-c9s-py311_2023c_20230922
       memoryLimit: 2Gi
       memoryRequest: 1Gi
       mountSources: true
