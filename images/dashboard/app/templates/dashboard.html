@@ -4,28 +4,36 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MQTT Dashboard</title>
-    <script src="/static/script.js"></script>
+    <script>
+        // Function to update the page content
+        function updateData() {
+            fetch('/get_mqtt_data')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('frame').innerText = data.frame;
+                document.getElementById('second').innerText = data.second;
+                document.getElementById('density').innerText = data.density;
+                document.getElementById('image').src = `data:image/jpeg;base64,${data.image}`;
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        // Refresh the data every 5 seconds
+        setInterval(updateData, 5000);
+    </script>
 </head>
 <body>
     <h1>MQTT Dashboard</h1>
     <div id="mqtt-message">
         <h2>Traffic Data:</h2>
+        <p><strong>Frame:</strong> {{ frame }}</p>
+        <p><strong>Second:</strong> {{ second }}s</p>
         <p><strong>Density:</strong> {{ density }} vehicles/m</p>
         {% if image %}
         <img src="data:image/jpeg;base64,{{ image }}" alt="Traffic Image">
         {% else %}
         <p>No image available</p>
         {% endif %}
-
-<!--     <div id="mqtt-image">
-        <h2>Latest Image:</h2>
-        <img id="image" src="{{ image }}" alt="Latest MQTT Image"/>
-    </div>
-    <div id="mqtt-info">
-        <h2>Frame Info:</h2>
-        <p>Frame: <span id="frame">{{ frame }}</span></p>
-        <p>Seconds: <span id="seconds">{{ seconds }}</span></p>
-        <p>LOS: <span id="los">{{ los }}</span></p> -->
     </div>
 </body>
 </html>

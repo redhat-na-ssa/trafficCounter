@@ -5,8 +5,6 @@ from fastapi.staticfiles import StaticFiles
 import paho.mqtt.client as mqtt
 import json
 import asyncio
-import json
-import base64
 
 app = FastAPI()
 
@@ -18,16 +16,11 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # Global variable to store the latest MQTT message
 latest_data = {
+    "frame": None,
+    "second": None,
     "density": None,
     "image": None
 }
-
-# # Global variables to store the latest data
-# latest_image = ""
-# latest_frame = 0
-# latest_seconds = 0
-# latest_los = ""
-
 
 # MQTT Configuration
 MQTT_BROKER = "mqtt-broker.trafficcounter.svc.cluster.local"  # Use your MQTT broker
@@ -42,22 +35,12 @@ def on_connect(client, userdata, flags, rc):
     client.subscribe(MQTT_TOPIC)
 
 def on_message(client, userdata, msg):
-
     global latest_data
     message = msg.payload.decode()
     try:
         latest_data = json.loads(message)
     except json.JSONDecodeError:
         print("Failed to decode JSON message")
-
-    # global latest_image, latest_frame, latest_seconds, latest_los
-    # payload = json.loads(msg.payload.decode())
-    # if 'image' in payload:
-    #     latest_image = "data:image/jpeg;base64," + base64.b64encode(payload['image'].encode('latin1')).decode('utf-8')
-    # latest_frame = payload.get('frame', 0)
-    # latest_seconds = payload.get('second', 0)
-    # latest_los = payload.get('los', '')
-
 
 client.on_connect = on_connect
 client.on_message = on_message
@@ -67,34 +50,19 @@ client.loop_start()
 
 @app.get("/", response_class=HTMLResponse)
 async def read_root(request: Request):
-
     global latest_data
-    return templates.TemplateResponse("dashboard.html", {"request": request, "density": latest_data["density"], "image": latest_data["image"]})
+    return templates.TemplateResponse("dashboard.html", {
+        "request": request, 
+        "frame": latest_data["frame"], 
+        "second": latest_data["second"], 
+        "density": latest_data["density"], 
+        "image": latest_data["image"]
+    })
 
 @app.get("/latest-message", response_class=HTMLResponse)
 async def get_latest_message():
     global latest_data
     return latest_data
-
-#     global latest_image, latest_frame, latest_seconds, latest_los
-#     return templates.TemplateResponse("dashboard.html", {
-#         "request": request, 
-#         "image": latest_image, 
-#         "frame": latest_frame,
-#         "seconds": latest_seconds,
-#         "los": latest_los
-#     })
-
-# @app.get("/latest-data", response_class=HTMLResponse)
-# async def get_latest_data():
-#     global latest_image, latest_frame, latest_seconds, latest_los
-#     return {
-#         "image": latest_image,
-#         "frame": latest_frame,
-#         "seconds": latest_seconds,
-#         "los": latest_los
-#     }
-
 
 @app.on_event("shutdown")
 def shutdown_event():
