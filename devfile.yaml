@@ -30,7 +30,7 @@ components:
           value: OpenShift console
         - name: OPENVSX_REGISTRY_URL
           value: ''
-      image: default-route-openshift-image-registry.apps.ocpbare.davenet.local/redhat-ods-applications/cuda-rhel9
+      image: workbench-images:cuda-c9s-py311-runtime-cudnn_2023c_20230922
       memoryLimit: 2Gi
       memoryRequest: 1Gi
       mountSources: true
