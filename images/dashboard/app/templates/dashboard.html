@@ -9,9 +9,13 @@
 <body>
     <h1>MQTT Dashboard</h1>
     <div id="mqtt-message">
-        <h2>Latest Message:</h2>
-        <p id="message">{{ message }}</p>
+        <h2>Traffic Data:</h2>
+        <p><strong>Density:</strong> {{ density }} vehicles/m</p>
+        {% if image %}
+        <img src="data:image/jpeg;base64,{{ image }}" alt="Traffic Image">
+        {% else %}
+        <p>No image available</p>
+        {% endif %}
     </div>
 </body>
 </html>
-
