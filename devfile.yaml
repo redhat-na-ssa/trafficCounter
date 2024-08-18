@@ -30,7 +30,8 @@ components:
           value: OpenShift console
         - name: OPENVSX_REGISTRY_URL
           value: ''
-      image: default-route-openshift-image-registry.apps.ocpbare.davenet.local/redhat-ods-applications/cv-notebook:latest
+      image: pull docker.io/davwhite/cvnotebook:latest
+
       memoryLimit: 2Gi
       memoryRequest: 1Gi
       mountSources: true
