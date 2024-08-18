@@ -19,7 +19,8 @@ latest_data = {
     "frame": None,
     "second": None,
     "density": None,
-    "image": None
+    "image": None,
+    "plot": None  # Add plot to the global state
 }
 
 # MQTT Configuration
@@ -56,7 +57,8 @@ async def read_root(request: Request):
         "frame": latest_data["frame"], 
         "second": latest_data["second"], 
         "density": latest_data["density"], 
-        "image": latest_data["image"]
+        "image": latest_data["image"],
+        "plot": latest_data["plot"]  # Pass the plot to the template
     })
 
 @app.get("/latest-message", response_class=HTMLResponse)
