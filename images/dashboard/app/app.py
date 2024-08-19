@@ -1,10 +1,11 @@
 from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 import paho.mqtt.client as mqtt
 import json
-import asyncio
+import os
+import base64
 
 app = FastAPI()
 
@@ -20,11 +21,11 @@ latest_data = {
     "second": None,
     "density": None,
     "image": None,
-    "plot": None  # Add plot to the global state
+    "plot": None
 }
 
 # MQTT Configuration
-MQTT_BROKER = "mqtt-broker.trafficcounter.svc.cluster.local"  # Use your MQTT broker
+MQTT_BROKER = "mqtt-broker.trafficcounter.svc.cluster.local"
 MQTT_PORT = 1883
 MQTT_TOPIC = "traffic/density"
 
@@ -40,6 +41,19 @@ def on_message(client, userdata, msg):
     message = msg.payload.decode()
     try:
         latest_data = json.loads(message)
+
+        if latest_data["image"]:
+            image_path = os.path.join("static", "latest_image.jpg")
+            with open(image_path, "wb") as img_file:
+                img_file.write(base64.b64decode(latest_data["image"]))
+            latest_data["image"] = f"/static/latest_image.jpg?{os.path.getmtime(image_path)}"
+
+        if latest_data["plot"]:
+            plot_path = os.path.join("static", "latest_plot.png")
+            with open(plot_path, "wb") as plot_file:
+                plot_file.write(base64.b64decode(latest_data["plot"]))
+            latest_data["plot"] = f"/static/latest_plot.png?{os.path.getmtime(plot_path)}"
+
     except json.JSONDecodeError:
         print("Failed to decode JSON message")
 
@@ -58,13 +72,13 @@ async def read_root(request: Request):
         "second": latest_data["second"], 
         "density": latest_data["density"], 
         "image": latest_data["image"],
-        "plot": latest_data["plot"]  # Pass the plot to the template
+        "plot": latest_data["plot"]
     })
 
-@app.get("/latest-message", response_class=HTMLResponse)
+@app.get("/latest-message", response_class=JSONResponse)
 async def get_latest_message():
     global latest_data
-    return latest_data
+    return JSONResponse(content=latest_data)
 
 @app.on_event("shutdown")
 def shutdown_event():
