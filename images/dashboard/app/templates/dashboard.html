@@ -35,9 +35,11 @@
                 document.getElementById('frame').innerText = data.frame;
                 document.getElementById('second').innerText = data.second;
                 document.getElementById('density').innerText = data.density;
-                document.getElementById('image').src = `data:image/jpeg;base64,${data.image}`;
+                if (data.image) {
+                    document.getElementById('image').src = data.image;
+                }
                 if (data.plot) {
-                    document.getElementById('plot').src = `data:image/png;base64,${data.plot}`;
+                    document.getElementById('plot').src = data.plot;
                 }
             })
             .catch(error => console.error('Error:', error));
@@ -57,12 +59,12 @@
             <p><strong>Density:</strong> <span id="density">{{ density }}</span> vehicles/m</p>
             <div class="image-container">
                 {% if image %}
-                <img id="image" src="data:image/jpeg;base64,{{ image }}" alt="Traffic Image">
+                <img id="image" src="{{ image }}" alt="Traffic Image">
                 {% else %}
                 <p>No image available</p>
                 {% endif %}
                 {% if plot %}
-                <img id="plot" src="data:image/png;base64,{{ plot }}" alt="Density Plot">
+                <img id="plot" src="{{ plot }}" alt="Density Plot">
                 {% else %}
                 <p>No plot available</p>
                 {% endif %}
