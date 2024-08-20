@@ -1,15 +1,18 @@
 schemaVersion: 2.2.2
 metadata:
-  name: python-hello-world
+  name: trafficCounter
 attributes:
   controller.devfile.io/devworkspace-config:
     name: devworkspace-config
     namespace: devspaces
   controller.devfile.io/storage-type: per-user
 projects:
-  - name: python-hello-world
-    zip:
-      location: https://eclipse-che.github.io/che-devfile-registry/main/resources/v2/python-hello-world.zip
+  - name: trafficCounter
+    git:
+      remotes:
+        origin: "https://github.com/redhat-na-ssa/trafficCounter.git"
+      checkoutFrom:
+        revision: main
 components:
   - container:
       env:
