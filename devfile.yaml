@@ -1,13 +1,13 @@
 schemaVersion: 2.2.2
 metadata:
-  name: trafficCounter
+  name: trafficcounter
 attributes:
   controller.devfile.io/devworkspace-config:
     name: devworkspace-config
     namespace: devspaces
   controller.devfile.io/storage-type: per-user
 projects:
-  - name: trafficCounter
+  - name: trafficcounter
     git:
       remotes:
         origin: "https://github.com/redhat-na-ssa/trafficCounter.git"
