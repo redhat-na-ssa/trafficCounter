@@ -25,7 +25,8 @@ latest_data = {
 }
 
 # MQTT Configuration
-MQTT_BROKER = "mqtt-broker.trafficcounter.svc.cluster.local"
+#MQTT_BROKER = "mqtt-broker.trafficcounter.svc.cluster.local"
+MQTT_BROKER = "mqtt"
 MQTT_PORT = 1883
 MQTT_TOPIC = "traffic/density"
 
@@ -60,8 +61,14 @@ def on_message(client, userdata, msg):
 client.on_connect = on_connect
 client.on_message = on_message
 
-client.connect(MQTT_BROKER, MQTT_PORT, 60)
-client.loop_start()
+try:
+    client.connect(MQTT_BROKER, MQTT_PORT, 60)
+    client.loop_start()
+    print("Connected successfully")
+except Exception as e:
+    print(f"Connection failed: {e}")
+
+
 
 @app.get("/", response_class=HTMLResponse)
 async def read_root(request: Request):

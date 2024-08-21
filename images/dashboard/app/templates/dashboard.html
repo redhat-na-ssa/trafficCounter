@@ -4,72 +4,203 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Traffic Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        /* Container for images */
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .card {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        h1, h2 {
+            color: #2c3e50;
+        }
+        .data-item {
+            margin-bottom: 10px;
+        }
+        .data-label {
+            font-weight: bold;
+            color: #7f8c8d;
+        }
+        .data-value {
+            font-size: 1.2em;
+            color: #2980b9;
+        }
         .image-container {
             display: flex;
-            justify-content: space-around;
+            justify-content: center;
             align-items: center;
-            max-width: 840px; /* Total width for two images */
-            margin: auto;
+            flex-direction: column;
         }
-        
-        /* Style for images */
         .image-container img {
-            max-width: 420px;
-            width: 100%;
+            max-width: 100%;
             height: auto;
+            border-radius: 4px;
+            margin-top: 10px;
         }
-
-        /* Text and image alignment */
-        .data-container {
+        #density-alert {
+            background-color: #e74c3c;
+            color: white;
+            padding: 10px;
+            border-radius: 4px;
             text-align: center;
+            display: none;
+            margin-bottom: 20px;
+        }
+        #gauge-container {
+            width: 100%;
+            max-width: 300px;
+            margin: 0 auto;
         }
     </style>
-    <script>
-        // Function to update the page content
-        function updateData() {
-            fetch('/latest-message')
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById('frame').innerText = data.frame;
-                document.getElementById('second').innerText = data.second;
-                document.getElementById('density').innerText = data.density;
-                if (data.image) {
-                    document.getElementById('image').src = data.image;
-                }
-                if (data.plot) {
-                    document.getElementById('plot').src = data.plot;
-                }
-            })
-            .catch(error => console.error('Error:', error));
-        }
-
-        // Refresh the data every 5 seconds
-        setInterval(updateData, 5000);
-    </script>
 </head>
 <body>
-    <div class="data-container">
-        <h1>Traffic Dashboard</h1>
-        <div id="mqtt-message">
-            <h2>Traffic Data:</h2>
-            <p><strong>Frame:</strong> <span id="frame">{{ frame }}</span></p>
-            <p><strong>Second:</strong> <span id="second">{{ second }}</span>s</p>
-            <p><strong>Density:</strong> <span id="density">{{ density }}</span> vehicles/m</p>
+    <h1>Traffic Dashboard</h1>
+    
+    <div id="density-alert">High traffic density detected!</div>
+
+    <div class="dashboard">
+        <div class="card">
+            <h2>Traffic Data</h2>
+            <div class="data-item">
+                <span class="data-label">Frame:</span>
+                <span class="data-value" id="frame">{{ frame }}</span>
+            </div>
+            <div class="data-item">
+                <span class="data-label">Second:</span>
+                <span class="data-value" id="second">{{ second }}s</span>
+            </div>
+            <div class="data-item">
+                <span class="data-label">Density:</span>
+                <span class="data-value" id="density">{{ density }} vehicles/m</span>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2>Density Gauge</h2>
+            <div id="gauge-container">
+                <canvas id="density-gauge"></canvas>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2>Traffic Image</h2>
             <div class="image-container">
                 {% if image %}
-                <img id="image" src="{{ image }}" alt="Traffic Image">
+                    <img id="traffic-image" src="{{ image }}" alt="Traffic Image">
                 {% else %}
-                <p>No image available</p>
+                    <p>No image available</p>
                 {% endif %}
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2>Density Plot</h2>
+            <div class="image-container">
                 {% if plot %}
-                <img id="plot" src="{{ plot }}" alt="Density Plot">
+                    <img id="density-plot" src="{{ plot }}" alt="Density Plot">
                 {% else %}
-                <p>No plot available</p>
+                    <p>No plot available</p>
                 {% endif %}
             </div>
         </div>
     </div>
+
+    <script>
+        const densityThreshold = 10; // Set your desired threshold here
+        let gaugeChart;
+
+        function initGauge() {
+            const ctx = document.getElementById('density-gauge').getContext('2d');
+            gaugeChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    datasets: [{
+                        data: [0, 1],
+                        backgroundColor: ['#2ecc71', '#ecf0f1'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    circumference: 180,
+                    rotation: -90,
+                    cutout: '75%',
+                    plugins: {
+                        tooltip: {
+                            enabled: false
+                        },
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateGauge(density) {
+            const normalizedDensity = Math.min(Math.max(density, 0), 1);
+            gaugeChart.data.datasets[0].data = [normalizedDensity, 1 - normalizedDensity];
+            
+            if (density <= 0.15) {
+                gaugeChart.data.datasets[0].backgroundColor[0] = '#2ecc71'; // Green
+            } else if (density < 0.25) {
+                gaugeChart.data.datasets[0].backgroundColor[0] = '#f39c12'; // Orange
+            } else {
+                gaugeChart.data.datasets[0].backgroundColor[0] = '#e74c3c'; // Red
+            }
+            
+            gaugeChart.update();
+        }
+
+        function updateDashboard(data) {
+            document.getElementById('frame').textContent = data.frame;
+            document.getElementById('second').textContent = data.second + 's';
+            document.getElementById('density').textContent = data.density + ' vehicles/m';
+            
+            if (data.image) {
+                document.getElementById('traffic-image').src = data.image;
+            }
+            if (data.plot) {
+                document.getElementById('density-plot').src = data.plot;
+            }
+
+            updateGauge(data.density);
+
+            const alertElement = document.getElementById('density-alert');
+            if (data.density > densityThreshold) {
+                alertElement.style.display = 'block';
+            } else {
+                alertElement.style.display = 'none';
+            }
+        }
+
+        function fetchLatestData() {
+            fetch('/latest-message')
+                .then(response => response.json())
+                .then(data => updateDashboard(data))
+                .catch(error => console.error('Error fetching data:', error));
+        }
+
+        // Initialize gauge and start fetching data
+        initGauge();
+        fetchLatestData();
+        // Update data every 5 seconds
+        setInterval(fetchLatestData, 5000);
+    </script>
 </body>
 </html>
