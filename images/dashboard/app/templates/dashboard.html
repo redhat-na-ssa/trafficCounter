@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Traffic Dashboard</title>
+    <title>Traffic Camera Details</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body {
@@ -67,16 +67,34 @@
             max-width: 300px;
             margin: 0 auto;
         }
+        .back-button {
+            display: inline-block;
+            background-color: #3498db;
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+            margin-bottom: 20px;
+        }
+        .back-button:hover {
+            background-color: #2980b9;
+        }
     </style>
 </head>
 <body>
-    <h1>Traffic Dashboard</h1>
+    <a href="/" class="back-button">← Back to All Cameras</a>
+    <h1>Traffic Camera Details</h1>
     
     <div id="density-alert">High traffic density detected!</div>
 
     <div class="dashboard">
         <div class="card">
             <h2>Traffic Data</h2>
+            <div class="data-item">
+                <span class="data-label">Location:</span>
+                <span class="data-value" id="location">{{ location }}</span>
+            </div>
             <div class="data-item">
                 <span class="data-label">Frame:</span>
                 <span class="data-value" id="frame">{{ frame }}</span>
@@ -122,7 +140,8 @@
     </div>
 
     <script>
-        const densityThreshold = 10; // Set your desired threshold here
+        const cameraId = "{{ camera_id }}";
+        const densityThreshold = 0.5; // Set threshold to 0.5 for high density alert
         let gaugeChart;
 
         function initGauge() {
@@ -156,9 +175,9 @@
             const normalizedDensity = Math.min(Math.max(density, 0), 1);
             gaugeChart.data.datasets[0].data = [normalizedDensity, 1 - normalizedDensity];
             
-            if (density <= 0.15) {
+            if (density <= 0.30) {
                 gaugeChart.data.datasets[0].backgroundColor[0] = '#2ecc71'; // Green
-            } else if (density < 0.25) {
+            } else if (density < 0.50) {
                 gaugeChart.data.datasets[0].backgroundColor[0] = '#f39c12'; // Orange
             } else {
                 gaugeChart.data.datasets[0].backgroundColor[0] = '#e74c3c'; // Red
@@ -168,9 +187,10 @@
         }
 
         function updateDashboard(data) {
-            document.getElementById('frame').textContent = data.frame;
-            document.getElementById('second').textContent = data.second + 's';
-            document.getElementById('density').textContent = data.density + ' vehicles/m';
+            document.getElementById('location').textContent = data.location || 'Unknown';
+            document.getElementById('frame').textContent = data.frame || 'N/A';
+            document.getElementById('second').textContent = (data.second || 'N/A') + 's';
+            document.getElementById('density').textContent = (data.density || 'N/A') + ' vehicles/m';
             
             if (data.image) {
                 document.getElementById('traffic-image').src = data.image;
@@ -190,7 +210,7 @@
         }
 
         function fetchLatestData() {
-            fetch('/latest-message')
+            fetch(`/api/camera/${cameraId}/latest`)
                 .then(response => response.json())
                 .then(data => updateDashboard(data))
                 .catch(error => console.error('Error fetching data:', error));
