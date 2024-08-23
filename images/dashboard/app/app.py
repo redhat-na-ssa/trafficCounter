@@ -19,7 +19,7 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 latest_data = {}
 
 # MQTT Configuration
-MQTT_BROKER = "mqtt"
+MQTT_BROKER = os.getenv('MQTT_BROKER', 'mqtt-broker.trafficcounter.svc.cluster.local')
 MQTT_PORT = 1883
 MQTT_TOPIC = "traffic/density/#"  # Subscribe to all camera topics
 
@@ -65,7 +65,7 @@ async def read_root(request: Request):
 
 @app.get("/camera/{camera_id}", response_class=HTMLResponse)
 async def read_camera(request: Request, camera_id: str):
-    camera_data = latest_data["density"]
+    camera_data = latest_data.get("density", {})
     return templates.TemplateResponse("dashboard.html", {
         "request": request,
         "camera_id": camera_id,
@@ -80,7 +80,7 @@ async def read_camera(request: Request, camera_id: str):
 @app.get("/api/camera/{camera_id}/latest", response_class=JSONResponse)
 async def get_latest_camera_data(camera_id: str):
     print(latest_data)
-    return JSONResponse(content=latest_data["density"]) #Using 0 here because I don't have multiple topics or cameras
+    return JSONResponse(content=latest_data.get("density", {})) #Using 0 here because I don't have multiple topics or cameras
 
 @app.on_event("shutdown")
 def shutdown_event():

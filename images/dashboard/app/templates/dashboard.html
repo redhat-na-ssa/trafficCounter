@@ -22,17 +22,22 @@
             flex-wrap: wrap;
             gap: 20px;
             flex-grow: 1;
-            align-content: flex-start;
         }
         .card {
             background-color: #fff;
             border-radius: 8px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             padding: 20px;
-            flex: 1 1 300px;
-            max-width: calc(50% - 10px);
             display: flex;
             flex-direction: column;
+        }
+        .small-card {
+            flex: 1 1 calc(33.333% - 20px);
+            min-width: 250px;
+        }
+        .large-card {
+            flex: 1 1 calc(50% - 20px);
+            min-height: 400px;
         }
         .card-header {
             cursor: move;
@@ -70,12 +75,12 @@
             align-items: center;
             flex-direction: column;
             flex-grow: 1;
+            overflow: hidden;
         }
         .image-container img {
             max-width: 100%;
-            height: auto;
-            border-radius: 4px;
-            margin-top: 10px;
+            max-height: 100%;
+            object-fit: contain;
         }
         #density-alert {
             background-color: #e74c3c;
@@ -148,9 +153,9 @@
     <div id="density-alert">High traffic density detected!</div>
 
     <div class="dashboard" id="dashboard">
-        <div class="card">
+        <div class="card small-card">
             <div class="card-header" draggable="true">
-                <h2>Traffic Data</h2>
+                <h2>Latest Traffic Data</h2>
             </div>
             <div class="data-item">
                 <span class="data-label">Location:</span>
@@ -170,7 +175,7 @@
             </div>
         </div>
         
-        <div class="card">
+        <div class="card small-card">
             <div class="card-header" draggable="true">
                 <h2>Density Gauge</h2>
             </div>
@@ -179,9 +184,18 @@
             </div>
         </div>
         
-        <div class="card">
+        <div class="card small-card">
             <div class="card-header" draggable="true">
-                <h2>Traffic Image</h2>
+                <h2>Events</h2>
+            </div>
+            <div class="event-list" id="event-list">
+                <!-- Event items will be dynamically added here -->
+            </div>
+        </div>
+
+        <div class="card large-card">
+            <div class="card-header" draggable="true">
+                <h2>Live Traffic</h2>
             </div>
             <div class="image-container">
                 {% if image %}
@@ -192,7 +206,7 @@
             </div>
         </div>
         
-        <div class="card">
+        <div class="card large-card">
             <div class="card-header" draggable="true">
                 <h2>Density Plot</h2>
             </div>
@@ -204,17 +218,7 @@
                 {% endif %}
             </div>
         </div>
-
-        <div class="card">
-            <div class="card-header" draggable="true">
-                <h2>Density Events</h2>
-            </div>
-            <div class="event-list" id="event-list">
-                <!-- Event items will be dynamically added here -->
-            </div>
-        </div>
     </div>
-
     <script>
         const cameraId = "{{ camera_id }}";
         const densityThreshold = 0.5; // Set threshold to 0.5 for high density alert
