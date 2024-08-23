@@ -13,7 +13,7 @@ def generate_stub_data(image_path, plot_image_path):
     return {
         "frame": random.randint(1000, 9999),
         "second": round(random.uniform(0, 59), 1),
-        "density": round(random.uniform(0.01, 0.99), 2),
+        "density": round(random.uniform(0.00, 0.04), 2),
         "image": get_base64_encoded_image(image_path),
         "plot": get_base64_encoded_image(plot_image_path)  # You can add a base64 encoded plot image here if needed
     }

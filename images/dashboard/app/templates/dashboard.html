@@ -221,7 +221,7 @@
     </div>
     <script>
         const cameraId = "{{ camera_id }}";
-        const densityThreshold = 0.5; // Set threshold to 0.5 for high density alert
+        const densityThreshold = 0.03; // Set threshold to 0.5 for high density alert
         let gaugeChart;
         let eventList = [];
 
@@ -231,7 +231,7 @@
                 type: 'doughnut',
                 data: {
                     datasets: [{
-                        data: [0, 1],
+                        data: [0, 0.04],
                         backgroundColor: ['#2ecc71', '#ecf0f1'],
                         borderWidth: 0
                     }]
@@ -255,12 +255,12 @@
         }
 
         function updateGauge(density) {
-            const normalizedDensity = Math.min(Math.max(density, 0), 1);
-            gaugeChart.data.datasets[0].data = [normalizedDensity, 1 - normalizedDensity];
+            const normalizedDensity = Math.min(Math.max(density, 0), 0.04);
+            gaugeChart.data.datasets[0].data = [normalizedDensity, 0.04 - normalizedDensity];
             
-            if (density <= 0.30) {
+            if (density <= 0.01) {
                 gaugeChart.data.datasets[0].backgroundColor[0] = '#2ecc71'; // Green
-            } else if (density < 0.50) {
+            } else if (density < 0.02) {
                 gaugeChart.data.datasets[0].backgroundColor[0] = '#f39c12'; // Orange
             } else {
                 gaugeChart.data.datasets[0].backgroundColor[0] = '#e74c3c'; // Red
@@ -270,7 +270,7 @@
         }
 
         function updateDashboard(data) {
-            document.getElementById('location').textContent = data.location || 'Unknown';
+            document.getElementById('location').textContent = data.location || 'I-85 S past SR211 MM 125.9 (Barrow)';
             document.getElementById('frame').textContent = data.frame || 'N/A';
             document.getElementById('second').textContent = (data.second || 'N/A') + 's';
             document.getElementById('density').textContent = (data.density || 'N/A') + ' vehicles/m';
@@ -285,7 +285,7 @@
             updateGauge(data.density);
 
             const alertElement = document.getElementById('density-alert');
-            if (data.density > densityThreshold) {
+            if (data.density >= densityThreshold) {
                 alertElement.style.display = 'block';
             } else {
                 alertElement.style.display = 'none';
@@ -318,11 +318,11 @@
                 
                 const densityElement = document.createElement('span');
                 densityElement.className = 'event-density';
-                densityElement.textContent = event.density.toFixed(2);
+                densityElement.textContent = event.density.toFixed(3);
                 
-                if (event.density <= 0.30) {
+                if (event.density <= 0.01) {
                     densityElement.classList.add('low');
-                } else if (event.density < 0.50) {
+                } else if (event.density < 0.02) {
                     densityElement.classList.add('medium');
                 } else {
                     densityElement.classList.add('high');
