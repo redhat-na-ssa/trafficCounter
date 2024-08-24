@@ -5,3 +5,4 @@ yolov8*.pt
 __pycache__/
 *.tgz
 videos/
+.DS_Store
