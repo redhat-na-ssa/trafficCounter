@@ -7,7 +7,7 @@ attributes:
     namespace: devspaces
   controller.devfile.io/storage-type: per-user
 projects:
-  - name: datasci-computer-vision
+  - name: trafficcounter
     git:
       remotes:
         origin: "https://github.com/redhat-na-ssa/trafficCounter.git"
@@ -15,8 +15,6 @@ projects:
         revision: main
 components:
   - container:
-      cpuLimit: '2'
-      cpuRequest: '1'
       env:
         - name: CHE_DASHBOARD_URL
           value: https://devspaces.apps.ocpbare.davenet.local
@@ -30,25 +28,23 @@ components:
           value: OpenShift console
         - name: OPENVSX_REGISTRY_URL
           value: ''
-      image: pull davwhite/cvnotebook:latest
-
-      memoryLimit: 2Gi
-      memoryRequest: 1Gi
+      image: quay.io/devfile/universal-developer-image:ubi8-latest
+      memoryLimit: 512Mi
       mountSources: true
       sourceMapping: /projects
       volumeMounts:
         - name: venv
           path: /home/user/.venv
-    name: python
+    name: tools
   - name: venv
     volume:
       size: 1G
 commands:
   - exec:
-      commandLine: python -m venv .venv && . .venv/bin/activate && python hello-world.py
-      component: python
+      commandLine: python3 hello-world.py
+      component: tools
       group:
         kind: run
-      label: Run the application
-      workingDir: ${PROJECTS_ROOT}/trafficcounter
-    id: run
+      label: Run application
+      workingDir: ${PROJECT_SOURCE}
+    id: run-application
