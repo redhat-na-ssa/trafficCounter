@@ -38,16 +38,16 @@ def on_message(client, userdata, msg):
     try:
         data = json.loads(message)
         if "image" in data and data["image"]:
-            image_path = os.path.join("static", f"latest_image_{camera_id}.jpg")
+            image_path = os.path.join("static/images", f"latest_image_{camera_id}.jpg")
             with open(image_path, "wb") as img_file:
                 img_file.write(base64.b64decode(data["image"]))
-            data["image"] = f"/static/latest_image_{camera_id}.jpg?{os.path.getmtime(image_path)}"
+            data["image"] = f"/static/images/latest_image_{camera_id}.jpg?{os.path.getmtime(image_path)}"
         
         if "plot" in data and data["plot"]:
-            plot_path = os.path.join("static", f"latest_plot_{camera_id}.png")
+            plot_path = os.path.join("static/images", f"latest_plot_{camera_id}.png")
             with open(plot_path, "wb") as plot_file:
                 plot_file.write(base64.b64decode(data["plot"]))
-            data["plot"] = f"/static/latest_plot_{camera_id}.png?{os.path.getmtime(plot_path)}"
+            data["plot"] = f"/static/images/latest_plot_{camera_id}.png?{os.path.getmtime(plot_path)}"
         
         latest_data[camera_id] = data
     except json.JSONDecodeError:
