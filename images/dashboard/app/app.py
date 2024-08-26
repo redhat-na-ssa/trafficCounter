@@ -15,19 +15,13 @@ templates = Jinja2Templates(directory="templates")
 # Mount the static directory
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-# Global variable to store the latest MQTT message
-latest_data = {
-    "frame": None,
-    "second": None,
-    "density": None,
-    "image": None,
-    "plot": None
-}
+# Global variable to store the latest MQTT messages for each camera
+latest_data = {}
 
 # MQTT Configuration
-MQTT_BROKER = "mqtt-broker.trafficcounter.svc.cluster.local"
+MQTT_BROKER = os.getenv('MQTT_BROKER', 'mqtt-broker.trafficcounter.svc.cluster.local')
 MQTT_PORT = 1883
-MQTT_TOPIC = "traffic/density"
+MQTT_TOPIC = "traffic/density/#"  # Subscribe to all camera topics
 
 # MQTT Client Setup
 client = mqtt.Client()
@@ -38,24 +32,26 @@ def on_connect(client, userdata, flags, rc):
 
 def on_message(client, userdata, msg):
     global latest_data
+    topic_parts = msg.topic.split('/')
+    camera_id = topic_parts[-1]  # Assuming topic format is traffic/density/{camera_id}
     message = msg.payload.decode()
     try:
-        latest_data = json.loads(message)
-
-        if latest_data["image"]:
-            image_path = os.path.join("static", "latest_image.jpg")
+        data = json.loads(message)
+        if "image" in data and data["image"]:
+            image_path = os.path.join("static", f"latest_image_{camera_id}.jpg")
             with open(image_path, "wb") as img_file:
-                img_file.write(base64.b64decode(latest_data["image"]))
-            latest_data["image"] = f"/static/latest_image.jpg?{os.path.getmtime(image_path)}"
-
-        if latest_data["plot"]:
-            plot_path = os.path.join("static", "latest_plot.png")
+                img_file.write(base64.b64decode(data["image"]))
+            data["image"] = f"/static/latest_image_{camera_id}.jpg?{os.path.getmtime(image_path)}"
+        
+        if "plot" in data and data["plot"]:
+            plot_path = os.path.join("static", f"latest_plot_{camera_id}.png")
             with open(plot_path, "wb") as plot_file:
-                plot_file.write(base64.b64decode(latest_data["plot"]))
-            latest_data["plot"] = f"/static/latest_plot.png?{os.path.getmtime(plot_path)}"
-
+                plot_file.write(base64.b64decode(data["plot"]))
+            data["plot"] = f"/static/latest_plot_{camera_id}.png?{os.path.getmtime(plot_path)}"
+        
+        latest_data[camera_id] = data
     except json.JSONDecodeError:
-        print("Failed to decode JSON message")
+        print(f"Failed to decode JSON message for camera {camera_id}")
 
 client.on_connect = on_connect
 client.on_message = on_message
@@ -65,20 +61,26 @@ client.loop_start()
 
 @app.get("/", response_class=HTMLResponse)
 async def read_root(request: Request):
-    global latest_data
+    return templates.TemplateResponse("landing.html", {"request": request})
+
+@app.get("/camera/{camera_id}", response_class=HTMLResponse)
+async def read_camera(request: Request, camera_id: str):
+    camera_data = latest_data.get("density", {})
     return templates.TemplateResponse("dashboard.html", {
-        "request": request, 
-        "frame": latest_data["frame"], 
-        "second": latest_data["second"], 
-        "density": latest_data["density"], 
-        "image": latest_data["image"],
-        "plot": latest_data["plot"]
+        "request": request,
+        "camera_id": camera_id,
+        "location": camera_data.get("location", "Unknown"),
+        "frame": camera_data.get("frame", "N/A"),
+        "second": camera_data.get("second", "N/A"),
+        "density": camera_data.get("density", "N/A"),
+        "image": camera_data.get("image", None),
+        "plot": camera_data.get("plot", None)
     })
 
-@app.get("/latest-message", response_class=JSONResponse)
-async def get_latest_message():
-    global latest_data
-    return JSONResponse(content=latest_data)
+@app.get("/api/camera/{camera_id}/latest", response_class=JSONResponse)
+async def get_latest_camera_data(camera_id: str):
+    print(latest_data)
+    return JSONResponse(content=latest_data.get("density", {})) #Using 0 here because I don't have multiple topics or cameras
 
 @app.on_event("shutdown")
 def shutdown_event():

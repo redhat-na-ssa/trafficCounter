@@ -3,73 +3,423 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Traffic Dashboard</title>
+    <title>Traffic Camera Details</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        /* Container for images */
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .dashboard {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            flex-grow: 1;
+        }
+        .card {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+        .small-card {
+            flex: 1 1 calc(33.333% - 20px);
+            min-width: 250px;
+        }
+        .large-card {
+            flex: 1 1 calc(50% - 20px);
+            min-height: 400px;
+        }
+        .card-header {
+            cursor: move;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 8px 8px 0 0;
+            margin: -20px -20px 15px -20px;
+        }
+        .card.dragging {
+            opacity: 0.5;
+            box-shadow: 0 8px 10px rgba(0, 0, 0, 0.2);
+        }
+        .card-placeholder {
+            border: 2px dashed #3498db;
+            background-color: #ecf0f1;
+        }
+        h1, h2 {
+            color: #2c3e50;
+            margin: 0;
+        }
+        .data-item {
+            margin-bottom: 10px;
+        }
+        .data-label {
+            font-weight: bold;
+            color: #7f8c8d;
+        }
+        .data-value {
+            font-size: 1.2em;
+            color: #2980b9;
+        }
         .image-container {
             display: flex;
-            justify-content: space-around;
+            justify-content: center;
             align-items: center;
-            max-width: 840px; /* Total width for two images */
-            margin: auto;
+            flex-direction: column;
+            flex-grow: 1;
+            overflow: hidden;
         }
-        
-        /* Style for images */
         .image-container img {
-            max-width: 420px;
-            width: 100%;
-            height: auto;
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
         }
-
-        /* Text and image alignment */
-        .data-container {
+        #density-alert {
+            background-color: #e74c3c;
+            color: white;
+            padding: 10px;
+            border-radius: 4px;
             text-align: center;
+            display: none;
+            margin-bottom: 20px;
+        }
+        #gauge-container {
+            width: 100%;
+            max-width: 300px;
+            margin: 0 auto;
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .back-button {
+            display: inline-block;
+            background-color: #3498db;
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+            margin-bottom: 20px;
+            align-self: flex-start;
+        }
+        .back-button:hover {
+            background-color: #2980b9;
+        }
+        .event-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .event-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px;
+            border-bottom: 1px solid #ecf0f1;
+        }
+        .event-item:last-child {
+            border-bottom: none;
+        }
+        .event-time {
+            font-weight: bold;
+        }
+        .event-density {
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: white;
+        }
+        .event-density.low {
+            background-color: #2ecc71;
+        }
+        .event-density.medium {
+            background-color: #f39c12;
+        }
+        .event-density.high {
+            background-color: #e74c3c;
         }
     </style>
-    <script>
-        // Function to update the page content
-        function updateData() {
-            fetch('/latest-message')
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById('frame').innerText = data.frame;
-                document.getElementById('second').innerText = data.second;
-                document.getElementById('density').innerText = data.density;
-                if (data.image) {
-                    document.getElementById('image').src = data.image;
-                }
-                if (data.plot) {
-                    document.getElementById('plot').src = data.plot;
-                }
-            })
-            .catch(error => console.error('Error:', error));
-        }
-
-        // Refresh the data every 5 seconds
-        setInterval(updateData, 5000);
-    </script>
 </head>
 <body>
-    <div class="data-container">
-        <h1>Traffic Dashboard</h1>
-        <div id="mqtt-message">
-            <h2>Traffic Data:</h2>
-            <p><strong>Frame:</strong> <span id="frame">{{ frame }}</span></p>
-            <p><strong>Second:</strong> <span id="second">{{ second }}</span>s</p>
-            <p><strong>Density:</strong> <span id="density">{{ density }}</span> vehicles/m</p>
+    <a href="/" class="back-button">← Back to Cameras</a>
+    <h1>Traffic Camera Details</h1>
+    
+    <div id="density-alert">High traffic density detected!</div>
+
+    <div class="dashboard" id="dashboard">
+        <div class="card small-card">
+            <div class="card-header" draggable="true">
+                <h2>Latest Traffic Data</h2>
+            </div>
+            <div class="data-item">
+                <span class="data-label">Location:</span>
+                <span class="data-value" id="location">{{ location }}</span>
+            </div>
+            <div class="data-item">
+                <span class="data-label">Frame:</span>
+                <span class="data-value" id="frame">{{ frame }}</span>
+            </div>
+            <div class="data-item">
+                <span class="data-label">Second:</span>
+                <span class="data-value" id="second">{{ second }}s</span>
+            </div>
+            <div class="data-item">
+                <span class="data-label">Density:</span>
+                <span class="data-value" id="density">{{ density }} vehicles/m</span>
+            </div>
+        </div>
+        
+        <div class="card small-card">
+            <div class="card-header" draggable="true">
+                <h2>Density Gauge</h2>
+            </div>
+            <div id="gauge-container">
+                <canvas id="density-gauge"></canvas>
+            </div>
+        </div>
+        
+        <div class="card small-card">
+            <div class="card-header" draggable="true">
+                <h2>Events</h2>
+            </div>
+            <div class="event-list" id="event-list">
+                <!-- Event items will be dynamically added here -->
+            </div>
+        </div>
+
+        <div class="card large-card">
+            <div class="card-header" draggable="true">
+                <h2>Live Traffic</h2>
+            </div>
             <div class="image-container">
                 {% if image %}
-                <img id="image" src="{{ image }}" alt="Traffic Image">
+                    <img id="traffic-image" src="{{ image }}" alt="Traffic Image">
                 {% else %}
-                <p>No image available</p>
+                    <p>No image available</p>
                 {% endif %}
+            </div>
+        </div>
+        
+        <div class="card large-card">
+            <div class="card-header" draggable="true">
+                <h2>Density Plot</h2>
+            </div>
+            <div class="image-container">
                 {% if plot %}
-                <img id="plot" src="{{ plot }}" alt="Density Plot">
+                    <img id="density-plot" src="{{ plot }}" alt="Density Plot">
                 {% else %}
-                <p>No plot available</p>
+                    <p>No plot available</p>
                 {% endif %}
             </div>
         </div>
     </div>
+    <script>
+        const cameraId = "{{ camera_id }}";
+        const densityThreshold = 0.03; // Set threshold to 0.5 for high density alert
+        let gaugeChart;
+        let eventList = [];
+
+        function initGauge() {
+            const ctx = document.getElementById('density-gauge').getContext('2d');
+            gaugeChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    datasets: [{
+                        data: [0, 0.04],
+                        backgroundColor: ['#2ecc71', '#ecf0f1'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    circumference: 180,
+                    rotation: -90,
+                    cutout: '75%',
+                    plugins: {
+                        tooltip: {
+                            enabled: false
+                        },
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateGauge(density) {
+            const normalizedDensity = Math.min(Math.max(density, 0), 0.04);
+            gaugeChart.data.datasets[0].data = [normalizedDensity, 0.04 - normalizedDensity];
+            
+            if (density <= 0.01) {
+                gaugeChart.data.datasets[0].backgroundColor[0] = '#2ecc71'; // Green
+            } else if (density < 0.02) {
+                gaugeChart.data.datasets[0].backgroundColor[0] = '#f39c12'; // Orange
+            } else {
+                gaugeChart.data.datasets[0].backgroundColor[0] = '#e74c3c'; // Red
+            }
+            
+            gaugeChart.update();
+        }
+
+        function updateDashboard(data) {
+            document.getElementById('location').textContent = data.location || 'I-85 S past SR211 MM 125.9 (Barrow)';
+            document.getElementById('frame').textContent = data.frame || 'N/A';
+            document.getElementById('second').textContent = (data.second || 'N/A') + 's';
+            document.getElementById('density').textContent = (data.density || 'N/A') + ' vehicles/m';
+            
+            if (data.image) {
+                document.getElementById('traffic-image').src = data.image;
+            }
+            if (data.plot) {
+                document.getElementById('density-plot').src = data.plot;
+            }
+
+            updateGauge(data.density);
+
+            const alertElement = document.getElementById('density-alert');
+            if (data.density >= densityThreshold) {
+                alertElement.style.display = 'block';
+            } else {
+                alertElement.style.display = 'none';
+            }
+
+            // Add new event to the list
+            addEventToList(new Date(), data.density);
+
+            updateEventList();
+        }
+
+        function addEventToList(time, density) {
+            eventList.unshift({ time, density });
+            if (eventList.length > 10) {
+                eventList.pop();
+            }
+        }
+
+        function updateEventList() {
+            const eventListElement = document.getElementById('event-list');
+            eventListElement.innerHTML = '';
+            
+            eventList.forEach(event => {
+                const eventItem = document.createElement('div');
+                eventItem.className = 'event-item';
+                
+                const timeElement = document.createElement('span');
+                timeElement.className = 'event-time';
+                timeElement.textContent = formatTime(event.time);
+                
+                const densityElement = document.createElement('span');
+                densityElement.className = 'event-density';
+                densityElement.textContent = event.density.toFixed(3);
+                
+                if (event.density <= 0.01) {
+                    densityElement.classList.add('low');
+                } else if (event.density < 0.02) {
+                    densityElement.classList.add('medium');
+                } else {
+                    densityElement.classList.add('high');
+                }
+                
+                eventItem.appendChild(timeElement);
+                eventItem.appendChild(densityElement);
+                eventListElement.appendChild(eventItem);
+            });
+        }
+
+        function formatTime(date) {
+            return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        }
+
+        function fetchLatestData() {
+            fetch(`/api/camera/${cameraId}/latest`)
+                .then(response => response.json())
+                .then(data => updateDashboard(data))
+                .catch(error => console.error('Error fetching data:', error));
+        }
+
+        // Initialize gauge and start fetching data
+        initGauge();
+        fetchLatestData();
+        // Update data every 5 seconds
+        setInterval(fetchLatestData, 5000);
+
+        // Drag and Drop functionality
+        const dashboard = document.getElementById('dashboard');
+        let draggedItem = null;
+        let placeholder = null;
+
+        function createPlaceholder() {
+            const ph = document.createElement('div');
+            ph.classList.add('card', 'card-placeholder');
+            ph.style.height = `${draggedItem.offsetHeight}px`;
+            ph.style.width = `${draggedItem.offsetWidth}px`;
+            return ph;
+        }
+
+        dashboard.addEventListener('dragstart', (e) => {
+            if (e.target.classList.contains('card-header')) {
+                draggedItem = e.target.closest('.card');
+                draggedItem.classList.add('dragging');
+                e.dataTransfer.setData('text/plain', '');
+                
+                // Create and insert placeholder
+                placeholder = createPlaceholder();
+                draggedItem.parentNode.insertBefore(placeholder, draggedItem.nextSibling);
+                
+                // Use a timeout to make the dragged item invisible after the drag starts
+                setTimeout(() => {
+                    draggedItem.style.display = 'none';
+                }, 0);
+            }
+        });
+
+        dashboard.addEventListener('dragend', (e) => {
+            if (draggedItem) {
+                draggedItem.classList.remove('dragging');
+                draggedItem.style.display = 'flex';
+                if (placeholder && placeholder.parentNode) {
+                    placeholder.parentNode.replaceChild(draggedItem, placeholder);
+                }
+                draggedItem = null;
+                placeholder = null;
+            }
+        });
+
+        dashboard.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            if (draggedItem) {
+                const afterElement = getDragAfterElement(dashboard, e.clientX, e.clientY);
+                if (afterElement == null) {
+                    dashboard.appendChild(placeholder);
+                } else {
+                    dashboard.insertBefore(placeholder, afterElement);
+                }
+            }
+        });
+
+        function getDragAfterElement(container, x, y) {
+            const draggableElements = [...container.querySelectorAll('.card:not(.dragging):not(.card-placeholder)')];
+            
+            return draggableElements.reduce((closest, child) => {
+                const box = child.getBoundingClientRect();
+                const offsetX = x - box.left - box.width / 2;
+                const offsetY = y - box.top - box.height / 2;
+                
+                if (offsetX < 0 && offsetY < 0 && offsetX > closest.offsetX && offsetY > closest.offsetY) {
+                    return { offsetX: offsetX, offsetY: offsetY, element: child };
+                } else {
+                    return closest;
+                }
+            }, { offsetX: Number.NEGATIVE_INFINITY, offsetY: Number.NEGATIVE_INFINITY }).element;
+        }
+    </script>
 </body>
 </html>
